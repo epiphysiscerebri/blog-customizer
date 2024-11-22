@@ -1,10 +1,9 @@
 import { createRoot } from 'react-dom/client';
-import { StrictMode, CSSProperties, useState } from 'react';
+import { StrictMode, CSSProperties, useState, useEffect } from 'react';
 import clsx from 'clsx';
 
 import { Article } from './components/article/Article';
 import { ArticleParamsForm } from './components/article-params-form/ArticleParamsForm';
-import { defaultArticleState } from './constants/articleProps';
 
 import './styles/index.scss';
 import styles from './styles/index.module.scss';
@@ -26,45 +25,67 @@ import {
 	fontColors,
 	backgroundColors,
 	contentWidthArr,
+	defaultArticleState,
 } from 'src/constants/articleProps';
 
 const domNode = document.getElementById('root') as HTMLDivElement;
 const root = createRoot(domNode);
 
+// Объект параметров для статьи
+let paramsForArticle = structuredClone(defaultArticleState);
+
 const App = () => {
+	// Состояние тригера кнопок
+	const [btnClickState, setBtnClickState] = useState(false);
+
+	// Состояние стрелки
 	const [arrowState, setArrowState] = useState(false);
 
+	// Функиця изменения состояния стрелки
 	const handleArrowState = () => setArrowState(!arrowState);
 
 	// Состояние дропдауна "шрифт"
 	const [fontFamilyOptionState, setFamilyOptionState] = useState(
 		fontFamilyOptions[0]
 	);
+
 	// Состояние радиогруппы "размер шрифта"
 	const [fontSizeOptionState, setFontSizeOptionState] = useState(
 		fontSizeOptions[0]
 	);
+
 	// Состояние дропдауна "размер шрифта"
 	const [fontColorState, setFontColorState] = useState(fontColors[0]);
+
 	// Состояние дропдауна "цвет шрифта"
 	const [backgroundColorState, setBackgroundColorState] = useState(
 		backgroundColors[0]
 	);
+
 	// Состояние дропдауна "ширина контента"
 	const [contentWidthArrState, setContentWidthArrState] = useState(
 		contentWidthArr[0]
 	);
+
+	// Применение настроек к статье
+	useEffect(() => {
+		setFamilyOptionState(paramsForArticle.fontFamilyOption);
+		setFontSizeOptionState(paramsForArticle.fontSizeOption);
+		setFontColorState(paramsForArticle.fontColor);
+		setBackgroundColorState(paramsForArticle.backgroundColor);
+		setContentWidthArrState(paramsForArticle.contentWidth);
+	}, [btnClickState]);
 
 	return (
 		<main
 			className={clsx(styles.main)}
 			style={
 				{
-					'--font-family': defaultArticleState.fontFamilyOption.value,
-					'--font-size': defaultArticleState.fontSizeOption.value,
-					'--font-color': defaultArticleState.fontColor.value,
-					'--container-width': defaultArticleState.contentWidth.value,
-					'--bg-color': defaultArticleState.backgroundColor.value,
+					'--font-family': paramsForArticle.fontFamilyOption.value,
+					'--font-size': paramsForArticle.fontSizeOption.value,
+					'--font-color': paramsForArticle.fontColor.value,
+					'--container-width': paramsForArticle.contentWidth.value,
+					'--bg-color': paramsForArticle.backgroundColor.value,
 				} as CSSProperties
 			}>
 			<ArticleParamsForm>
@@ -129,8 +150,29 @@ const App = () => {
 								}}
 							/>
 							<div className={stylesParamForm.bottomContainer}>
-								<Button title='Сбросить' htmlType='reset' type='clear' />
-								<Button title='Применить' htmlType='submit' type='apply' />
+								<Button
+									title='Сбросить'
+									htmlType='reset'
+									type='clear'
+									onClick={() => {
+										paramsForArticle = structuredClone(defaultArticleState);
+										setBtnClickState(!btnClickState);
+									}}
+								/>
+								<Button
+									title='Применить'
+									htmlType='submit'
+									type='apply'
+									onClick={(e) => {
+										e.preventDefault();
+										paramsForArticle.fontFamilyOption = fontFamilyOptionState;
+										paramsForArticle.fontSizeOption = fontSizeOptionState;
+										paramsForArticle.fontColor = fontColorState;
+										paramsForArticle.backgroundColor = backgroundColorState;
+										paramsForArticle.contentWidth = contentWidthArrState;
+										setBtnClickState(!btnClickState);
+									}}
+								/>
 							</div>
 						</form>
 					</aside>
