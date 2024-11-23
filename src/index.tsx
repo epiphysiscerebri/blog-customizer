@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { StrictMode, CSSProperties, useState, useEffect } from 'react';
+import { StrictMode, CSSProperties, useState, useEffect, useRef } from 'react';
 import clsx from 'clsx';
 
 import { Article } from './components/article/Article';
@@ -28,6 +28,8 @@ import {
 	defaultArticleState,
 } from 'src/constants/articleProps';
 
+import { useOutsideClickClose } from './ui/select/hooks/useOutsideClickClose';
+
 const domNode = document.getElementById('root') as HTMLDivElement;
 const root = createRoot(domNode);
 
@@ -35,11 +37,26 @@ const root = createRoot(domNode);
 let paramsForArticle = structuredClone(defaultArticleState);
 
 const App = () => {
+	// Ссылка на обёртку формы
+	const rootRef = useRef(null);
+
 	// Состояние тригера кнопок
 	const [btnClickState, setBtnClickState] = useState(false);
 
 	// Состояние стрелки
 	const [arrowState, setArrowState] = useState(false);
+
+	// Закрытие вне стрелки
+	useOutsideClickClose({
+		isOpen: arrowState,
+		rootRef: rootRef,
+		onClose: () => {
+			setArrowState(false);
+		},
+		onChange: () => {
+			arrowState;
+		},
+	});
 
 	// Функиця изменения состояния стрелки
 	const handleArrowState = () => setArrowState(!arrowState);
@@ -88,96 +105,98 @@ const App = () => {
 					'--bg-color': paramsForArticle.backgroundColor.value,
 				} as CSSProperties
 			}>
-			<ArticleParamsForm>
-				<>
-					<ArrowButton isOpen={arrowState} onClick={handleArrowState} />
-					<aside
-						className={cn(
-							stylesParamForm.container,
-							arrowState ? stylesParamForm.container_open : null
-						)}>
-						<form className={stylesParamForm.form}>
-							{/* Заголовок формы */}
-							<Text as='h1' size={31} weight={800} uppercase={true}>
-								задайте параметры
-							</Text>
-							{/* Дропдаун "шрифт" */}
-							<Select
-								title={'шрифт'}
-								selected={fontFamilyOptionState}
-								options={fontFamilyOptions}
-								onChange={(selected) => {
-									setFamilyOptionState(selected);
-								}}
-							/>
-							{/* Радиогруппа "размер шрифта" */}
-							<RadioGroup
-								title={'размер шрифта'}
-								selected={fontSizeOptionState}
-								options={fontSizeOptions}
-								name={'radio'}
-								onChange={(value) => {
-									setFontSizeOptionState(value);
-								}}
-							/>
-							{/* Дропдаун "цвет шрифта" */}
-							<Select
-								title={'цвет шрифта'}
-								selected={fontColorState}
-								options={fontColors}
-								onChange={(selected) => {
-									setFontColorState(selected);
-								}}
-							/>
-							{/* Сепаратор */}
-							<Separator />
-							{/* Дропдаун "цвет фона" */}
-							<Select
-								title={'цвет фона'}
-								selected={backgroundColorState}
-								options={backgroundColors}
-								onChange={(selected) => {
-									setBackgroundColorState(selected);
-								}}
-							/>
-							{/* Дропдаун "ширина контента" */}
-							<Select
-								title={'ширина контента'}
-								selected={contentWidthArrState}
-								options={contentWidthArr}
-								onChange={(selected) => {
-									setContentWidthArrState(selected);
-								}}
-							/>
-							<div className={stylesParamForm.bottomContainer}>
-								<Button
-									title='Сбросить'
-									htmlType='reset'
-									type='clear'
-									onClick={() => {
-										paramsForArticle = structuredClone(defaultArticleState);
-										setBtnClickState(!btnClickState);
+			<div ref={rootRef}>
+				<ArticleParamsForm>
+					<>
+						<ArrowButton isOpen={arrowState} onClick={handleArrowState} />
+						<aside
+							className={cn(
+								stylesParamForm.container,
+								arrowState ? stylesParamForm.container_open : null
+							)}>
+							<form className={stylesParamForm.form}>
+								{/* Заголовок формы */}
+								<Text as='h1' size={31} weight={800} uppercase={true}>
+									задайте параметры
+								</Text>
+								{/* Дропдаун "шрифт" */}
+								<Select
+									title={'шрифт'}
+									selected={fontFamilyOptionState}
+									options={fontFamilyOptions}
+									onChange={(selected) => {
+										setFamilyOptionState(selected);
 									}}
 								/>
-								<Button
-									title='Применить'
-									htmlType='submit'
-									type='apply'
-									onClick={(e) => {
-										e.preventDefault();
-										paramsForArticle.fontFamilyOption = fontFamilyOptionState;
-										paramsForArticle.fontSizeOption = fontSizeOptionState;
-										paramsForArticle.fontColor = fontColorState;
-										paramsForArticle.backgroundColor = backgroundColorState;
-										paramsForArticle.contentWidth = contentWidthArrState;
-										setBtnClickState(!btnClickState);
+								{/* Радиогруппа "размер шрифта" */}
+								<RadioGroup
+									title={'размер шрифта'}
+									selected={fontSizeOptionState}
+									options={fontSizeOptions}
+									name={'radio'}
+									onChange={(value) => {
+										setFontSizeOptionState(value);
 									}}
 								/>
-							</div>
-						</form>
-					</aside>
-				</>
-			</ArticleParamsForm>
+								{/* Дропдаун "цвет шрифта" */}
+								<Select
+									title={'цвет шрифта'}
+									selected={fontColorState}
+									options={fontColors}
+									onChange={(selected) => {
+										setFontColorState(selected);
+									}}
+								/>
+								{/* Сепаратор */}
+								<Separator />
+								{/* Дропдаун "цвет фона" */}
+								<Select
+									title={'цвет фона'}
+									selected={backgroundColorState}
+									options={backgroundColors}
+									onChange={(selected) => {
+										setBackgroundColorState(selected);
+									}}
+								/>
+								{/* Дропдаун "ширина контента" */}
+								<Select
+									title={'ширина контента'}
+									selected={contentWidthArrState}
+									options={contentWidthArr}
+									onChange={(selected) => {
+										setContentWidthArrState(selected);
+									}}
+								/>
+								<div className={stylesParamForm.bottomContainer}>
+									<Button
+										title='Сбросить'
+										htmlType='reset'
+										type='clear'
+										onClick={() => {
+											paramsForArticle = structuredClone(defaultArticleState);
+											setBtnClickState(!btnClickState);
+										}}
+									/>
+									<Button
+										title='Применить'
+										htmlType='submit'
+										type='apply'
+										onClick={(e) => {
+											e.preventDefault();
+											paramsForArticle.fontFamilyOption = fontFamilyOptionState;
+											paramsForArticle.fontSizeOption = fontSizeOptionState;
+											paramsForArticle.fontColor = fontColorState;
+											paramsForArticle.backgroundColor = backgroundColorState;
+											paramsForArticle.contentWidth = contentWidthArrState;
+											setBtnClickState(!btnClickState);
+										}}
+									/>
+								</div>
+							</form>
+						</aside>
+					</>
+				</ArticleParamsForm>
+			</div>
 			<Article />
 		</main>
 	);
