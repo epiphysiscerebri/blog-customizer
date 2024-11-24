@@ -1,8 +1,9 @@
 import { useState } from 'react';
 
+import clsx from 'clsx';
+
 import { ArrowButton } from 'src/ui/arrow-button';
 import { Button } from 'src/ui/button';
-import cn from 'classnames';
 
 import { Text } from 'src/ui/text';
 import { Select } from 'src/ui/select';
@@ -65,7 +66,7 @@ export const ArticleParamsForm = ({
 		<>
 			<ArrowButton isOpen={isOpen} onClick={onClick} />
 			<aside
-				className={cn(styles.container, isOpen ? styles.container_open : null)}>
+				className={clsx(styles.container, { [styles.container_open]: isOpen })}>
 				<form
 					className={styles.form}
 					onSubmit={(e) => {
