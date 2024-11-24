@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 import clsx from 'clsx';
 
@@ -12,6 +12,8 @@ import { Separator } from 'src/ui/separator';
 
 import styles from 'src/components/article-params-form/ArticleParamsForm.module.scss';
 
+import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
+
 import {
 	fontFamilyOptions,
 	fontSizeOptions,
@@ -23,16 +25,31 @@ import {
 } from 'src/constants/articleProps';
 
 type TArticleParamsForm = {
-	isOpen: boolean;
-	onClick: () => void;
 	onSubmit: (params?: any) => void;
 };
 
-export const ArticleParamsForm = ({
-	isOpen,
-	onClick,
-	onSubmit,
-}: TArticleParamsForm) => {
+export const ArticleParamsForm = ({ onSubmit }: TArticleParamsForm) => {
+	// Ссылка на обёртку формы
+	const rootFormRef = useRef(null);
+
+	// Состояние стрелки
+	const [arrowState, setArrowState] = useState(false);
+
+	// Закрытие вне стрелки
+	useOutsideClickClose({
+		isOpen: arrowState,
+		rootRef: rootFormRef,
+		onClose: () => {
+			setArrowState(false);
+		},
+		onChange: () => {
+			arrowState;
+		},
+	});
+
+	// Функиця изменения состояния стрелки
+	const handleArrowState = () => setArrowState(!arrowState);
+
 	//Состояние формы
 	const [formState, setFormState] = useState(defaultArticleState);
 
@@ -63,10 +80,12 @@ export const ArticleParamsForm = ({
 	};
 
 	return (
-		<>
-			<ArrowButton isOpen={isOpen} onClick={onClick} />
+		<div ref={rootFormRef}>
+			<ArrowButton isOpen={arrowState} onClick={handleArrowState} />
 			<aside
-				className={clsx(styles.container, { [styles.container_open]: isOpen })}>
+				className={clsx(styles.container, {
+					[styles.container_open]: arrowState,
+				})}>
 				<form
 					className={styles.form}
 					onSubmit={(e) => {
@@ -139,6 +158,6 @@ export const ArticleParamsForm = ({
 					</div>
 				</form>
 			</aside>
-		</>
+		</div>
 	);
 };
